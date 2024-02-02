@@ -8,6 +8,8 @@ jobs:
         - uses: actions/checkout@v4
         # Get correct Target
         - run: rustup target add wasm32-unknown-unknown
+        # Add wasm-bindgen
+        - run: cargo install wasm-bindgen
         # Build
         - run: bash build_wasm_linux.sh
         # Zip
