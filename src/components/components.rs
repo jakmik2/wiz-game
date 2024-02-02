@@ -12,7 +12,10 @@ pub trait Component {
         // Default draws circle
         let pos = self.get_pos();
         let size = self.get_size();
-        draw_rectangle(pos.x, pos.y, size.x, size.y, YELLOW)
+        draw_rectangle_ex(pos.x - size.x / 2., pos.y - size.y / 2., size.x, size.y, DrawRectangleParams {
+            color: YELLOW,
+            ..Default::default()
+        });
     }
     fn get_pos(&self) -> Vec2;
     fn get_size(&self) -> Vec2;

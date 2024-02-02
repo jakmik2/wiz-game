@@ -1,21 +1,39 @@
 use macroquad::prelude::*;
 use rapier2d::{control::{CharacterCollision, KinematicCharacterController}, parry::query, prelude::*};
 
-use crate::Component;
+use crate::{Component, Scene};
 
 pub struct Player {
     pub id: String,
     pub pos: Vec2,
     pub size: Vec2,
     pub velocity: f32,
-    pub character_controller: KinematicCharacterController,
     pub character_handle: RigidBodyHandle
+}
+
+impl Player {
+    pub fn add_to_scene(scene: &mut Scene, pos: Vec2, size: Vec2) {
+        let player_rigid_body: RigidBodyBuilder = RigidBodyBuilder::kinematic_position_based().translation(vector![pos.x, pos.y]);
+        let player_handle: RigidBodyHandle = scene.push_body(player_rigid_body);
+        let collider: Collider = ColliderBuilder::cuboid(size.x / 2., size.y / 2.).build();
+    
+        let player = Player {
+            id: "".to_string(),
+            pos,
+            size,
+            velocity: 5.,
+            character_handle: player_handle,
+        };
+
+        let player_box = Box::new(player);
+        
+        scene.push_collider(player_box, player_handle, collider);
+    }
 }
 
 impl Component for Player {
     fn ready(&mut self) -> () {
-        miniquad::debug!("Player has made it!");
-        
+        miniquad::debug!("Player has entered scene it!");
     }
 
     fn physics_process(&mut self, dt: f32, colliders: &ColliderSet, bodies: &mut RigidBodySet, queries: &QueryPipeline) -> () {
@@ -32,8 +50,10 @@ impl Component for Player {
 
         let mut collisions = vec![];
 
+        let character_controller = KinematicCharacterController::default();
+
         // Correct Movement
-        let mvt = self.character_controller.move_shape(
+        let mvt = character_controller.move_shape(
             dt, 
             bodies, 
             colliders, 
@@ -48,7 +68,7 @@ impl Component for Player {
         // Resolve collisions
         for collision in &collisions {
             miniquad::debug!("Collided: {:?}", collision);
-            self.character_controller.solve_character_collision_impulses(
+            character_controller.solve_character_collision_impulses(
                 dt,
                 bodies, 
                 colliders, 

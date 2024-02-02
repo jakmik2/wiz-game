@@ -27,8 +27,8 @@ struct Deck {
 fn window_conf() -> Conf {
     Conf {
         window_title: "Wiz Game".to_owned(),
-        window_height: 1080,
-        window_width: 1920,
+        window_height: 1080 / 4,
+        window_width: 1920 / 4,
         high_dpi: true,
         ..Default::default()
     }
@@ -51,40 +51,26 @@ async fn main() {
      * Player
      */
 
-    // Need One source of truth for position and size 
-    let player_rigid_body: RigidBodyBuilder = RigidBodyBuilder::kinematic_position_based().translation(vector![screen_height() / 4., screen_width() / 4.]);
-    let player_handle: RigidBodyHandle = scene.push_body(player_rigid_body);
-    let collider: Collider = ColliderBuilder::cuboid(2.5, 2.5).build();
- 
-    let player = Player {
-        id: "".to_string(),
-        pos: Vec2::new(screen_height() / 4., screen_width() / 4.),
-        size: Vec2::new(5., 5.),
-        velocity: 5.,
-        character_handle: player_handle,
-        character_controller: KinematicCharacterController::default(),
-    };
-
-    let player_box = Box::new(player);
-    
-    scene.push_collider(player_box, player_handle, collider);
+    Player::add_to_scene(
+        &mut scene,
+        Vec2::new(screen_width() / 4., screen_height() / 4.),
+        Vec2::new(10., 20.)
+    );
 
     /*
      * NPC Collider
      */
-    let npc = NPC {
-        id: "".to_string(),
-        pos: Vec2::new(screen_width() / 2. - 340., screen_height() / 2. + 40.),
-        size: Vec2::new(5., 5.),
-    };
 
-    let npc_rb = RigidBodyBuilder::fixed().translation(vector![npc.pos.x, npc.pos.y]);
-    let npc_handle = scene.push_body(npc_rb);
-    let npc_collider = ColliderBuilder::cuboid(npc.size.x / 2., npc.size.y / 2.).build();
-    
-    let npc_box = Box::new(npc);
-    
-    scene.push_collider(npc_box, npc_handle, npc_collider);
+    for i in 0..30 {
+        if i == 5 {
+            continue;
+        }
+        NPC::add_to_scene(
+            &mut scene,
+            Vec2::new(i as f32 * 40., screen_height() / 2.),
+            Vec2::new(40., 40.)  
+        );
+    }
 
     let mut fps_times: VecDeque<i32> = VecDeque::new();
 
@@ -122,9 +108,6 @@ async fn main() {
             // REGION : PHYSICS PROCESSES
             if physics_manager.run() {
                 scene.call_physics(physics_manager.last_frame);
-
-                // CHECK COLLISIONS
-                
             }
 
             // REGION : FRAME PROCESSES
