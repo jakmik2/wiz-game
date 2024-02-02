@@ -1,0 +1,9 @@
+name: deploy-game
+run-name: ${{ github.actor }} is deploying WizGame
+on: [push]
+jobs:
+  run-build-script:
+    runs-on: ubuntu-latest
+    steps:
+        - uses: actions/checkout@v4
+        - run: bash build_wasm_linux.sh
