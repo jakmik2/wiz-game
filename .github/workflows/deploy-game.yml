@@ -9,7 +9,7 @@ jobs:
         # Get correct Target
         - run: rustup target add wasm32-unknown-unknown
         # Add wasm-bindgen
-        - run: cargo install wasm-bindgen
+        - run: cargo install -f wasm-bindgen-cli
         # Build
         - run: bash build_wasm_linux.sh
         # Zip
