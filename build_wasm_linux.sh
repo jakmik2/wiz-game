@@ -41,7 +41,7 @@ mkdir -p wbindgen
 wasm-bindgen --target web --out-dir wbindgen/ target/wasm32-unknown-unknown/release/$PROJECT_NAME.wasm
 
 # Shim to tie the thing together
-sed '' "s/import \* as __wbg_star0 from 'env';//" wbindgen/$PROJECT_NAME.js
-sed '' "s/let wasm;/let wasm; export const set_wasm = (w) => wasm = w;/" wbindgen/$PROJECT_NAME.js
-sed '' "s/imports\['env'\] = __wbg_star0;/return imports.wbg\;/" wbindgen/$PROJECT_NAME.js
-sed '' "s/const imports = __wbg_get_imports();/return __wbg_get_imports();/" wbindgen/$PROJECT_NAME.js
+sed -i "s/import \* as __wbg_star0 from 'env';//" wbindgen/$PROJECT_NAME.js
+sed -i "s/let wasm;/let wasm; export const set_wasm = (w) => wasm = w;/" wbindgen/$PROJECT_NAME.js
+sed -i "s/imports\['env'\] = __wbg_star0;/return imports.wbg\;/" wbindgen/$PROJECT_NAME.js
+sed -i "s/const imports = __wbg_get_imports();/return __wbg_get_imports();/" wbindgen/$PROJECT_NAME.js
