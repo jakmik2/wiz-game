@@ -1,6 +1,9 @@
 name: deploy-game
 run-name: ${{ github.actor }} is deploying WizGame
-on: [push]
+on: 
+  push:
+    branches:
+      - develop
 jobs:
   deploy-build-game:
     runs-on: ubuntu-latest
@@ -13,6 +16,7 @@ jobs:
           with:
               version: 'latest'
         # Build
+        # TODO : CACHE RUST DEPS https://github.com/marketplace/actions/rust-cache
         - run: bash build_wasm_linux.sh
         # Zip
         - run: zip -r wbindgen.zip wbindgen
