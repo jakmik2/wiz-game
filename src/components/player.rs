@@ -1,5 +1,9 @@
 use macroquad::prelude::*;
-use rapier2d::{control::{CharacterCollision, KinematicCharacterController}, parry::query, prelude::*};
+use rapier2d::{
+    control::{CharacterCollision, KinematicCharacterController},
+    parry::query,
+    prelude::*,
+};
 
 use crate::{Component, Scene};
 
@@ -8,26 +12,28 @@ pub struct Player {
     pub size: Vec2,
     pub velocity: f32,
     pub character_handle: RigidBodyHandle,
-    pub collider_handle: Option<ColliderHandle>
-
+    pub collider_handle: Option<ColliderHandle>,
 }
 
 impl Player {
     pub fn add_to_scene(scene: &mut Scene, pos: Vec2, size: Vec2) -> () {
-        let player_rigid_body: RigidBodyBuilder = RigidBodyBuilder::kinematic_position_based().translation(vector![pos.x, pos.y]);
+        let player_rigid_body: RigidBodyBuilder =
+            RigidBodyBuilder::kinematic_position_based().translation(vector![pos.x, pos.y]);
         let player_handle: RigidBodyHandle = scene.push_body(player_rigid_body);
-        let collider: Collider = ColliderBuilder::cuboid(size.x / 2., size.y / 2.).sensor(true).build();
-    
+        let collider: Collider = ColliderBuilder::cuboid(size.x / 2., size.y / 2.)
+            .sensor(true)
+            .build();
+
         let player = Player {
             pos,
             size,
             velocity: 5.,
             character_handle: player_handle,
-            collider_handle: None
+            collider_handle: None,
         };
 
         let player_box = Box::new(player);
-        
+
         scene.push_collider_with_rb(player_box, player_handle, collider);
     }
 }
@@ -37,7 +43,14 @@ impl Component for Player {
         miniquad::debug!("Player has entered scene it!");
     }
 
-    fn physics_process(&mut self, dt: f32, colliders: &ColliderSet, bodies: &mut RigidBodySet, queries: &QueryPipeline, narrow_phase: &NarrowPhase) -> () {
+    fn physics_process(
+        &mut self,
+        dt: f32,
+        colliders: &ColliderSet,
+        bodies: &mut RigidBodySet,
+        queries: &QueryPipeline,
+        narrow_phase: &NarrowPhase,
+    ) -> () {
         // Attempt Move
         let desired_translation = self.movement();
 
@@ -77,7 +90,7 @@ impl Component for Player {
                 character_collider.shape(),
                 character_mass,
                 collision,
-                QueryFilter::new().exclude_rigid_body(self.character_handle)
+                QueryFilter::new().exclude_rigid_body(self.character_handle),
             )
         }
 
@@ -114,7 +127,7 @@ impl Player {
 
         match get_last_key_pressed() {
             Some(key) => miniquad::debug!("{:?}", key),
-            None => ()
+            None => (),
         };
 
         if is_mouse_button_down(MouseButton::Left) {
@@ -125,7 +138,7 @@ impl Player {
         if is_key_down(KeyCode::W) {
             translation.y -= self.velocity;
         }
-        
+
         if is_key_down(KeyCode::S) {
             translation.y += self.velocity;
         }

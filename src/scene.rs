@@ -1,6 +1,6 @@
-use std::collections::{HashMap, HashSet};
 use macroquad::prelude::*;
 use rapier2d::{crossbeam, prelude::*};
+use std::collections::{HashMap, HashSet};
 
 use crate::{components::collider, Component};
 
@@ -22,7 +22,6 @@ pub struct Scene {
 }
 
 impl Scene {
-
     pub fn new() -> Self {
         Self {
             component_scale: 60.,
@@ -33,7 +32,7 @@ impl Scene {
             queries: QueryPipeline::new(),
             narrow_phase: NarrowPhase::new(),
 
-        // Bunch of facking vars    
+            // Bunch of facking vars
             integration_parameters: IntegrationParameters::default(),
             island_manager: IslandManager::new(),
             broad_phase: BroadPhase::new(),
@@ -47,27 +46,27 @@ impl Scene {
         self.bodies.insert(rbb)
     }
 
-    pub fn push_collider(
-            &mut self, 
-            mut component: Box<dyn Component>,
-            collider: Collider
-        ) -> () {
+    pub fn push_collider(&mut self, mut component: Box<dyn Component>, collider: Collider) -> () {
         let collider_handle = self.colliders.insert(collider);
         component.assign_collider_handle(collider_handle);
 
-        self.components.insert(component.get_collider_handle(), component);
+        self.components
+            .insert(component.get_collider_handle(), component);
     }
 
     pub fn push_collider_with_rb(
-            &mut self, 
-            mut component: Box<dyn Component>, 
-            handle: RigidBodyHandle,
-            collider: Collider
-        ) -> () {
-        let collider_handle: ColliderHandle = self.colliders.insert_with_parent(collider, handle, &mut self.bodies);
+        &mut self,
+        mut component: Box<dyn Component>,
+        handle: RigidBodyHandle,
+        collider: Collider,
+    ) -> () {
+        let collider_handle: ColliderHandle =
+            self.colliders
+                .insert_with_parent(collider, handle, &mut self.bodies);
         component.assign_collider_handle(collider_handle);
-    
-        self.components.insert(component.get_collider_handle(), component);
+
+        self.components
+            .insert(component.get_collider_handle(), component);
     }
 
     pub fn call_ready(&mut self) -> () {
@@ -78,7 +77,13 @@ impl Scene {
 
     pub fn call_physics(&mut self, dt: f32) -> () {
         for component in self.components.values_mut() {
-            component.physics_process(dt, &self.colliders, &mut self.bodies, &self.queries, &self.narrow_phase);
+            component.physics_process(
+                dt,
+                &self.colliders,
+                &mut self.bodies,
+                &self.queries,
+                &self.narrow_phase,
+            );
         }
 
         let (collision_send, collision_recv) = crossbeam::channel::unbounded();
@@ -88,7 +93,7 @@ impl Scene {
         let gravity = vector![0.0, 0.0];
 
         let physics_hooks = ();
-        
+
         // Run pipeline
         self.physics_pipeline.step(
             &gravity,
@@ -106,20 +111,20 @@ impl Scene {
             &event_handler,
         );
 
-        while let Ok(collision_event) = collision_recv.try_recv() {
-            miniquad::debug!("Collision Event: {:?}", collision_event);
-        }
+        // while let Ok(collision_event) = collision_recv.try_recv() {
+        //     miniquad::debug!("Collision Event: {:?}", collision_event);
+        // }
 
-        while let Ok(contact_force_event) = contact_force_recv.try_recv() {
-            miniquad::debug!("Contact event: {:?}", contact_force_event);
-        }
+        // while let Ok(contact_force_event) = contact_force_recv.try_recv() {
+        //     miniquad::debug!("Contact event: {:?}", contact_force_event);
+        // }
 
-        for (collider1, collider2, intersecting) in self.narrow_phase.intersection_pairs() {
-            miniquad::debug!("Colliders {:?}", collider1);
-            if intersecting {
-                miniquad::debug!("The colliders {:?} and {:?} are intersecting!", collider1, collider2);
-            }
-        }
+        // for (collider1, collider2, intersecting) in self.narrow_phase.intersection_pairs() {
+        //     miniquad::debug!("Colliders {:?}", collider1);
+        //     if intersecting {
+        //         miniquad::debug!("The colliders {:?} and {:?} are intersecting!", collider1, collider2);
+        //     }
+        // }
     }
 
     pub fn call_draw(&self) -> () {
