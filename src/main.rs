@@ -1,16 +1,15 @@
 pub mod components;
-pub mod systems;
-pub mod states;
 mod scene;
+pub mod states;
+pub mod systems;
 
 use std::collections::VecDeque;
 
 use macroquad::prelude::*;
 
 use components::prelude::*;
-use rapier2d::{control::KinematicCharacterController, geometry::Collider, na::Point, parry::shape::{Capsule, Cuboid}, prelude::*};
-use systems::prelude::*;
 use scene::*;
+use systems::prelude::*;
 
 const MAP_SIZE: i16 = 64;
 
@@ -21,7 +20,7 @@ struct GameState {
 }
 
 struct Deck {
-    cards: Vec<Box<dyn Card>>
+    cards: Vec<Box<dyn Card>>,
 }
 
 fn window_conf() -> Conf {
@@ -46,7 +45,7 @@ async fn main() {
      * World
      */
     let mut scene = Scene::new();
-    
+
     /*
      * Player
      */
@@ -54,7 +53,7 @@ async fn main() {
     Player::add_to_scene(
         &mut scene,
         Vec2::new(screen_width() / 4., screen_height() / 4.),
-        Vec2::new(10., 20.)
+        Vec2::new(0.99, 0.33),
     );
 
     /*
@@ -67,8 +66,8 @@ async fn main() {
         }
         NPC::add_to_scene(
             &mut scene,
-            Vec2::new(i as f32 * 40., screen_height() / 2.),
-            Vec2::new(40., 40.)  
+            Vec2::new(i as f32 * 60., screen_height() / 2.),
+            Vec2::new(1., 1.),
         );
     }
 
@@ -84,7 +83,7 @@ async fn main() {
             let font_size = 40.;
 
             let text = "Press [Enter] to start Game";
-            
+
             let text_size = measure_text(text, None, font_size as _, 1.0);
 
             draw_text(
@@ -128,12 +127,20 @@ async fn main() {
             let _popped = fps_times.pop_back();
         }
 
-        let fps = format!("AVG of last 100 FPS: {:.0}", fps_times.clone().into_iter().reduce(|a, b| (a.wrapping_add(b))).unwrap_or_default() / fps_times.len() as i32);
+        let fps = format!(
+            "AVG of last 100 FPS: {:.0}",
+            fps_times
+                .clone()
+                .into_iter()
+                .reduce(|a, b| (a.wrapping_add(b)))
+                .unwrap_or_default()
+                / fps_times.len() as i32
+        );
 
         let fps_text_size = measure_text(fps.as_str(), None, 32. as _, 1.0);
 
         draw_text(fps.as_str(), 10., fps_text_size.height + 10., 32., DARKGRAY);
-        
+
         next_frame().await;
     }
 }

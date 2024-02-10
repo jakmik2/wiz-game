@@ -6,19 +6,24 @@ pub trait Component {
     // Initialize Component Behavior
     fn ready(&mut self) -> () {}
     // Every Frame physics Process
-    fn physics_process(&mut self, dt: f32, colliders: &ColliderSet, bodies: &mut RigidBodySet, queries: &QueryPipeline) -> () {}
+    fn physics_process(&mut self, dt: f32, colliders: &ColliderSet, bodies: &mut RigidBodySet, queries: &QueryPipeline, narrow_phase: &NarrowPhase) -> () {}
     // Every Frame Draw
-    fn draw(&self) {
+    fn draw(&self, scale: Option<f32>) {
         // Default draws circle
+        let scale =  match scale {
+            Some(x) => x,
+            None => 1.0
+        };
+
         let pos = self.get_pos();
         let size = self.get_size();
-        draw_rectangle_ex(pos.x - size.x / 2., pos.y - size.y / 2., size.x, size.y, DrawRectangleParams {
+        draw_rectangle_ex(pos.x - size.x / 2., pos.y - size.y / 2., size.x * scale, size.y * scale, DrawRectangleParams {
             color: YELLOW,
             ..Default::default()
         });
     }
     fn get_pos(&self) -> Vec2;
     fn get_size(&self) -> Vec2;
-    fn get_id(&self) -> String;
-    fn assign_id(&mut self, id: &str) -> ();
+    fn get_collider_handle(&self) -> ColliderHandle;
+    fn assign_collider_handle(&mut self, collider_handle: ColliderHandle) -> ();
 }

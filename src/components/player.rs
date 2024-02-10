@@ -4,30 +4,31 @@ use rapier2d::{control::{CharacterCollision, KinematicCharacterController}, parr
 use crate::{Component, Scene};
 
 pub struct Player {
-    pub id: String,
     pub pos: Vec2,
     pub size: Vec2,
     pub velocity: f32,
-    pub character_handle: RigidBodyHandle
+    pub character_handle: RigidBodyHandle,
+    pub collider_handle: Option<ColliderHandle>
+
 }
 
 impl Player {
-    pub fn add_to_scene(scene: &mut Scene, pos: Vec2, size: Vec2) {
+    pub fn add_to_scene(scene: &mut Scene, pos: Vec2, size: Vec2) -> () {
         let player_rigid_body: RigidBodyBuilder = RigidBodyBuilder::kinematic_position_based().translation(vector![pos.x, pos.y]);
         let player_handle: RigidBodyHandle = scene.push_body(player_rigid_body);
-        let collider: Collider = ColliderBuilder::cuboid(size.x / 2., size.y / 2.).build();
+        let collider: Collider = ColliderBuilder::cuboid(size.x / 2., size.y / 2.).sensor(true).build();
     
         let player = Player {
-            id: "".to_string(),
             pos,
             size,
             velocity: 5.,
             character_handle: player_handle,
+            collider_handle: None
         };
 
         let player_box = Box::new(player);
         
-        scene.push_collider(player_box, player_handle, collider);
+        scene.push_collider_with_rb(player_box, player_handle, collider);
     }
 }
 
@@ -36,7 +37,7 @@ impl Component for Player {
         miniquad::debug!("Player has entered scene it!");
     }
 
-    fn physics_process(&mut self, dt: f32, colliders: &ColliderSet, bodies: &mut RigidBodySet, queries: &QueryPipeline) -> () {
+    fn physics_process(&mut self, dt: f32, colliders: &ColliderSet, bodies: &mut RigidBodySet, queries: &QueryPipeline, narrow_phase: &NarrowPhase) -> () {
         // Attempt Move
         let desired_translation = self.movement();
 
@@ -54,12 +55,12 @@ impl Component for Player {
 
         // Correct Movement
         let mvt = character_controller.move_shape(
-            dt, 
-            bodies, 
-            colliders, 
-            queries, 
-            character_collider.shape(), 
-            character_collider.position(), 
+            dt,
+            bodies,
+            colliders,
+            queries,
+            character_collider.shape(),
+            character_collider.position(),
             vector![desired_translation.x, desired_translation.y],
             QueryFilter::new().exclude_rigid_body(self.character_handle),
             |c| collisions.push(c),
@@ -70,19 +71,18 @@ impl Component for Player {
             miniquad::debug!("Collided: {:?}", collision);
             character_controller.solve_character_collision_impulses(
                 dt,
-                bodies, 
-                colliders, 
-                queries, 
-                character_collider.shape(), 
-                character_mass, 
-                collision, 
+                bodies,
+                colliders,
+                queries,
+                character_collider.shape(),
+                character_mass,
+                collision,
                 QueryFilter::new().exclude_rigid_body(self.character_handle)
             )
         }
 
         // TODO : track position in one source of truth
         let character_body = &mut bodies[self.character_handle];
-        miniquad::debug!("{:?}", &mvt.translation);
 
         let pos = character_body.position();
         let modified_pos = pos.translation.vector + mvt.translation;
@@ -99,12 +99,12 @@ impl Component for Player {
         self.size
     }
 
-    fn get_id(&self) -> String {
-        self.id.clone()
+    fn get_collider_handle(&self) -> ColliderHandle {
+        self.collider_handle.unwrap()
     }
 
-    fn assign_id(&mut self, id: &str) -> () {
-        self.id = id.to_string();
+    fn assign_collider_handle(&mut self, collider_handle: ColliderHandle) -> () {
+        self.collider_handle = Some(collider_handle);
     }
 }
 
@@ -119,7 +119,6 @@ impl Player {
 
         if is_mouse_button_down(MouseButton::Left) {
             miniquad::debug!("LMB pressed");
-            miniquad::debug!("PLAYER WITH ID : {:?}", self.get_id());
         }
 
         // Update player position
