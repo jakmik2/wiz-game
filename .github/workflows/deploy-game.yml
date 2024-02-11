@@ -1,9 +1,11 @@
 name: deploy-game
 run-name: ${{ github.actor }} is deploying WizGame
-on: 
+on:
   push:
     branches:
       - develop
+  workflow_dispatch:
+
 jobs:
   deploy-build-game:
     runs-on: ubuntu-latest
