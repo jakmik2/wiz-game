@@ -1,14 +1,5 @@
 use macroquad::prelude::*;
-use rapier2d::{
-    control::{CharacterCollision, KinematicCharacterController},
-    parry::query,
-    prelude::*,
-};
-use rapier2d::{
-    control::{CharacterCollision, KinematicCharacterController},
-    parry::query,
-    prelude::*,
-};
+use rapier2d::{control::KinematicCharacterController, prelude::*};
 
 use crate::{Component, Scene};
 
@@ -16,8 +7,6 @@ pub struct Player {
     pub pos: Vec2,
     pub size: Vec2,
     pub velocity: f32,
-    pub character_handle: RigidBodyHandle,
-    pub collider_handle: Option<ColliderHandle>,
     pub character_handle: RigidBodyHandle,
     pub collider_handle: Option<ColliderHandle>,
 }
@@ -35,12 +24,9 @@ impl Player {
             velocity: 5.,
             character_handle: player_handle,
             collider_handle: None,
-            collider_handle: None,
         };
 
         let player_box = Box::new(player);
-
-        scene.push_collider_with_rb(player_box, player_handle, collider);
 
         scene.push_collider_with_rb(player_box, player_handle, collider);
     }
@@ -81,12 +67,6 @@ impl Component for Player {
             queries,
             character_collider.shape(),
             character_collider.position(),
-            dt,
-            bodies,
-            colliders,
-            queries,
-            character_collider.shape(),
-            character_collider.position(),
             vector![desired_translation.x, desired_translation.y],
             QueryFilter::new().exclude_rigid_body(self.character_handle),
             |c| collisions.push(c),
@@ -97,13 +77,6 @@ impl Component for Player {
             // miniquad::debug!("Collided: {:?}", collision);
             character_controller.solve_character_collision_impulses(
                 dt,
-                bodies,
-                colliders,
-                queries,
-                character_collider.shape(),
-                character_mass,
-                collision,
-                QueryFilter::new().exclude_rigid_body(self.character_handle),
                 bodies,
                 colliders,
                 queries,
@@ -135,8 +108,6 @@ impl Component for Player {
 
     fn get_collider_handle(&self) -> ColliderHandle {
         self.collider_handle.unwrap()
-    fn get_collider_handle(&self) -> ColliderHandle {
-        self.collider_handle.unwrap()
     }
 
     fn assign_collider_handle(&mut self, collider_handle: Option<ColliderHandle>) -> () {
@@ -163,7 +134,6 @@ impl Player {
             translation.y -= self.velocity;
         }
 
-
         if is_key_down(KeyCode::S) {
             translation.y += self.velocity;
         }
@@ -179,4 +149,3 @@ impl Player {
         translation
     }
 }
-

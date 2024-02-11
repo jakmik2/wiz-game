@@ -59,12 +59,9 @@ impl Component for NPC {
 
     fn get_collider_handle(&self) -> ColliderHandle {
         self.collider_handle.unwrap()
-    fn get_collider_handle(&self) -> ColliderHandle {
-        self.collider_handle.unwrap()
     }
 
     fn assign_collider_handle(&mut self, collider_handle: Option<ColliderHandle>) -> () {
         self.collider_handle = collider_handle;
     }
 }
-

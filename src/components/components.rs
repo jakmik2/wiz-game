@@ -17,12 +17,6 @@ pub trait Component {
     fn draw(&self, scale: Option<f32>) {
         let scale = scale.unwrap_or(1.0);
 
-        // Default draws circle
-        let scale =  match scale {
-            Some(x) => x,
-            None => 1.0
-        };
-
         let pos = self.get_pos();
         let size = self.get_size() * scale;
         draw_rectangle_ex(
